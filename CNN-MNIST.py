@@ -67,11 +67,17 @@ if __name__ == '__main__':
     fc1_relu = tf.nn.relu(tf.matmul(conv2_pool_flat, fc1_w)+fc1_b)
 
     """
+        add the layer of dropout
+    """
+    prob = tf.placeholder(dtype=tf.float32)
+    fc1_dropout = tf.nn.dropout(fc1_relu, keep_prob=prob)
+
+    """
         the output layer of softmax
     """
     softmax_w = weight_init([1024, 10])
     softmax_b = bais_init([10])
-    y_output = tf.nn.softmax(tf.matmul(fc1_relu, softmax_w)+softmax_b)
+    y_output = tf.nn.softmax(tf.matmul(fc1_dropout, softmax_w)+softmax_b)
 
     cross_entropy = -tf.reduce_sum(y*tf.log(y_output))
     train = tf.train.AdamOptimizer(0.0001).minimize(cross_entropy)
@@ -88,10 +94,10 @@ if __name__ == '__main__':
         'accurate_validation':[]
     }
     sess.run(init)
-    for i in range(300):
+    for i in range(1000):
         print("=========Iter_num"+str(i)+"==========")
         batch_x, batch_y = mnist.train.next_batch(128)
-        _, batch_cost = sess.run([train, cross_entropy], feed_dict={x:batch_x, y:batch_y})
+        _, batch_cost = sess.run([train, cross_entropy], feed_dict={x:batch_x, y:batch_y, prob:0.8})
 
         """
             对训练集的预测精确度
@@ -100,7 +106,8 @@ if __name__ == '__main__':
             accurate,
             feed_dict={
                 x:mnist.train.images[:100],
-                y:mnist.train.labels[:100]
+                y:mnist.train.labels[:100],
+                prob:1.0
             }
         )
         print("the accurate of train :"+str(accurate_train*100)+"%")
@@ -111,7 +118,8 @@ if __name__ == '__main__':
             accurate,
             feed_dict={
                 x:mnist.validation.images[:100],
-                y:mnist.validation.labels[:100]
+                y:mnist.validation.labels[:100],
+                prob:1.0
             }
         )
         print("the accurate of validation :" + str(accurate_val * 100) + "%")
@@ -130,7 +138,8 @@ if __name__ == '__main__':
         accurate,
         feed_dict={
             x:mnist.test.images[:2000],
-            y:mnist.test.labels[:2000]
+            y:mnist.test.labels[:2000],
+            prob:1.0
         }
     )
     print("the accurate of test data set :" + str(accurate_test * 100) + "%")
