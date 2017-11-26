@@ -2,6 +2,7 @@
 __author__ = 'lijm'
 __date__ = '2017/11/22 下午4:18'
 
+import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import tensorflow as tf
@@ -30,6 +31,10 @@ def maxpooling_2X2(input):
 
 if __name__ == '__main__':
     mnist = input_data.read_data_sets("./mnist", one_hot=True)
+    test_image = np.array(mnist.train.images[6]).reshape((28, 28))*255
+    print(test_image)
+    plt.imshow(test_image)
+    plt.show()
 
     sess = tf.InteractiveSession()
 
